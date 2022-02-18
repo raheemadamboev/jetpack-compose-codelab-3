@@ -20,14 +20,17 @@ class ToDoActivity : ComponentActivity() {
         setContent {
 
             val viewmodel = viewModel<ToDoViewModel>()
-            val todos by viewmodel.todoItems.observeAsState(initial = emptyList())
 
             JetpackComposeCodelab3Theme {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
                     TodoScreen(
-                        items = todos,
+                        items = viewmodel.todos,
+                        currentlyEditing = viewmodel.currentEditItem,
                         onAddItem = viewmodel::addItem,
-                        onRemoveItem = viewmodel::removeItem
+                        onRemoveItem = viewmodel::removeItem,
+                        onStartEdit = viewmodel::onEditItemSelected,
+                        onEditItemChange = viewmodel::onEditItemChange,
+                        onEditDone = viewmodel::onEditDone
                     )
                 }
             }
