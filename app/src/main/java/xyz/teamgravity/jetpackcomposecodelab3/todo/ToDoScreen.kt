@@ -9,7 +9,9 @@ import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,14 +46,8 @@ fun TodoScreen(
             }
         }
 
-        // For quick testing, a random item generator button
-        Button(
-            onClick = { onAddItem(generateRandomTodoItem()) },
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-        ) {
-            Text("Add random item")
+        TodoItemInputBackground(elevate = true, modifier = Modifier.fillMaxWidth()) {
+            TodoItemInput(onItemComplete = onAddItem)
         }
     }
 }
@@ -106,4 +102,60 @@ fun PreviewTodoScreen() {
 fun PreviewTodoRow() {
     val todo = remember { generateRandomTodoItem() }
     TodoRow(todo = todo, onItemClicked = {}, modifier = Modifier.fillMaxWidth())
+}
+
+@Composable
+fun TodoItemInput(onItemComplete: (TodoItem) -> Unit) {
+    val (text, setText) = remember { mutableStateOf("") }
+    val (icon, setIcon) = remember { mutableStateOf(TodoIcon.Default)}
+    val iconsVisible = text.isNotBlank()
+    val submit = {
+        onItemComplete(TodoItem(text, icon))
+        setIcon(TodoIcon.Default)
+        setText("")
+    }
+
+    Column {
+        Row(
+            Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 16.dp)
+        ) {
+            TodoInputTextField(
+                text = text,
+                onTextChange = setText,
+                onImeAction = submit,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp)
+            )
+            TodoEditButton(
+                onClick = submit,
+                text = "Add",
+                modifier = Modifier.align(Alignment.CenterVertically),
+                enabled = text.isNotBlank()
+            )
+        }
+
+        if (iconsVisible) {
+            AnimatedIconRow(icon, setIcon, Modifier.padding(top = 8.dp))
+        } else {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+fun TodoInputTextField(
+    text: String,
+    onTextChange: (String) -> Unit,
+    modifier: Modifier,
+    onImeAction: () -> Unit
+) {
+    TodoInputText(
+        text = text,
+        onTextChange = onTextChange,
+        modifier = modifier,
+        onImeAction = onImeAction
+    )
 }
